@@ -1,4 +1,8 @@
 import random
+import copy
+from preguntas import * 
+from tablero_life import *
+
 
 def dar_bienvenida()->str:
     print ("L I F E")
@@ -18,8 +22,20 @@ def mostrar_menu()->int:
             validar = False                     
         except:
             print ("Opcion incorrecta, ingrese un dato valido")                                                                   
-    return opcion                                                                  
-  
+    return opcion  
+
+def empezar_juego():
+    nombre_jugador = dar_bienvenida()
+    puntos = 15000
+    posicion = 0
+    copia_preguntas = copy.deepcopy(preguntas)
+    jugar = True
+    while jugar:
+        posicion = lanzar_dado(nombre_jugador, puntos, posicion, tablero)
+        puntos = sumar_restar_puntos(posicion, tablero, puntos)
+        puntos = mostrar_trivia(posicion, tablero, puntos, copia_preguntas)
+        jugar = comprobar_estado(nombre_jugador, posicion, puntos, tablero)
+ 
 def cambiar_minus(text:str)->str:                                                   
     minuscula = ""                                                                  
     for letra in text:                                                              
@@ -92,28 +108,28 @@ def comprobar_estado(jugador:str, posicion:int, puntos: int, tablero:list)->bool
     return iniciar_juego
 
 def anotar_jugador(jugador:str, puntaje:int):
-    with open("C:/Users/sebas/OneDrive/Desktop/copia juego life/score.csv", "a") as archivo:
+    with open("score.csv", "a") as archivo:
         archivo.write(f"{jugador},{puntaje}\n")
 
 def leer_score()->list:
     lista = []
     try:
-        with open("C:/Users/sebas/OneDrive/Desktop/copia juego life/score.csv", "r") as archivo:
+        with open("score.csv", "r") as archivo:
             for linea in archivo:
-                nombre, puntaje = linea.split(",")
-                lista.append([nombre, int(puntaje)])
+                jugador_ganador = linea.split(",")
+                lista.append(jugador_ganador)
     except FileNotFoundError:
         print("No se encontro el archivo ")
     return lista
 
-def ordenar_nombres(archivo)->list:
-    for i in range(len(archivo) -1):
-        for j in range(i + 1, len(archivo)):
-            if archivo[i][0] > archivo[j][0]:
-                aux = archivo[i]
-                archivo[i] = archivo[j]
-                archivo[j] = aux
-    return archivo
+def ordenar_nombres(lista_jugadores)->list:
+    for i in range(len(lista_jugadores) -1):
+        for j in range(i + 1, len(lista_jugadores)):
+            if lista_jugadores[i][0] > lista_jugadores[j][0]:
+                aux = lista_jugadores[i]
+                lista_jugadores[i] = lista_jugadores[j]
+                lista_jugadores[j] = aux
+    return lista_jugadores
 
 def mostrar_score():
     score = leer_score()
@@ -121,16 +137,7 @@ def mostrar_score():
     print("Ganadores")              
     for nombre, puntaje in score:
         print(f"Jugador: {nombre} | Puntos: {puntaje}")   
-
-def volver_menu()->bool:   
-    ingreso_usuario = cambiar_minus(input("Desea volver al menu principal? (si/no): "))                                 
-    if ingreso_usuario == "si" :
-        ingreso_usuario = True
-        mostrar_menu()
-    else:
-        print ("¡Adios!")
-        ingreso_usuario = False
-    return ingreso_usuario       
+     
 
 
 
